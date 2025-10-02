@@ -13,7 +13,17 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hfz4^=g(!p9(1j^$^@x*k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Handle Railway domains dynamically
+allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+railway_domain = os.environ.get('RAILWAY_STATIC_URL', '')
+if railway_domain:
+    # Extract domain from Railway URL
+    import re
+    domain_match = re.search(r'https?://([^/]+)', railway_domain)
+    if domain_match:
+        allowed_hosts.append(domain_match.group(1))
+
+ALLOWED_HOSTS = allowed_hosts
 
 # Application definition
 INSTALLED_APPS = [

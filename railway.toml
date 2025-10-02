@@ -2,8 +2,11 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python manage.py migrate && gunicorn flightcode.wsgi --bind 0.0.0.0:$PORT"
+startCommand = "gunicorn flightcode.wsgi --bind 0.0.0.0:$PORT"
+healthcheckPath = "/"
+restartPolicyType = "ON_FAILURE"
 
 [environment]
 DJANGO_SETTINGS_MODULE = "flightcode.settings"
 DEBUG = "False"
+SECRET_KEY = "change-this-in-production"
