@@ -15,6 +15,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Handle Render domains dynamically
 allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Add Render external URL domain
 render_domain = os.environ.get('RENDER_EXTERNAL_URL', '')
 if render_domain:
     # Extract domain from Render URL
@@ -23,7 +25,13 @@ if render_domain:
     if domain_match:
         allowed_hosts.append(domain_match.group(1))
 
-ALLOWED_HOSTS = allowed_hosts
+# Add common Render domains and the specific app domain
+allowed_hosts.extend([
+    'flitghtcode-1.onrender.com',  # Your specific app domain
+    'onrender.com',  # Render domain
+])
+
+ALLOWED_HOSTS = list(set(allowed_hosts))  # Remove duplicates
 
 # Application definition
 INSTALLED_APPS = [
