@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ["python310", "python310Packages.pip", "postgresql"]
+
+[phases.install]
+cmds = [
+  "python -m ensurepip --upgrade",
+  "python -m pip install --upgrade pip",
+  "pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+  "python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT"

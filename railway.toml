@@ -1,0 +1,11 @@
+[build]
+dockerfilePath = "Dockerfile.railway"
+
+[deploy]
+healthcheckPath = "/"
+restartPolicyType = "ON_FAILURE"
+
+[environment]
+DJANGO_SETTINGS_MODULE = "flightcode.settings"
+DEBUG = "False"
+SECRET_KEY = "change-this-in-production"
