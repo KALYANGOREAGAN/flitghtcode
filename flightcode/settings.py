@@ -13,13 +13,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hfz4^=g(!p9(1j^$^@x*k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# Handle Railway domains dynamically
+# Handle Render domains dynamically
 allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-railway_domain = os.environ.get('RAILWAY_STATIC_URL', '')
-if railway_domain:
-    # Extract domain from Railway URL
+render_domain = os.environ.get('RENDER_EXTERNAL_URL', '')
+if render_domain:
+    # Extract domain from Render URL
     import re
-    domain_match = re.search(r'https?://([^/]+)', railway_domain)
+    domain_match = re.search(r'https?://([^/]+)', render_domain)
     if domain_match:
         allowed_hosts.append(domain_match.group(1))
 

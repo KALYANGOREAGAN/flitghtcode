@@ -42,35 +42,45 @@ python manage.py runserver
 
 ## Deployment
 
-### Railway (Recommended - Easiest)
+### Render (Recommended - Most Reliable)
 
-1. **Create Railway Account**
-   - Go to [railway.app](https://railway.app)
+1. **Create Render Account**
+   - Go to [render.com](https://render.com)
    - Sign up with GitHub
 
-2. **Deploy**
+2. **Deploy with Blueprint (Easiest)**
    ```bash
-   # Install Railway CLI
-   npm install -g @railway/cli
-
-   # Login and create project
-   railway login
-   railway init
-
-   # Connect your GitHub repository
-   # Railway will auto-deploy on git push
+   # Push your code to GitHub first
+   git add .
+   git commit -m "Ready for Render deployment"
+   git push origin main
    ```
 
-3. **Environment Variables**
-   Set these in Railway dashboard:
+3. **Create New Blueprint**
+   - Go to Render Dashboard
+   - Click "New" → "Blueprint"
+   - Connect your GitHub repository
+   - Render will auto-detect `render.yaml` and create services
+
+4. **Or Manual Setup:**
+   - Click "New" → "Web Service"
+   - Connect your GitHub repo
+   - Set:
+     - **Runtime:** Python 3
+     - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput --clear`
+     - **Start Command:** `gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT`
+
+5. **Environment Variables**
+   Set these in Render dashboard:
    ```
-   SECRET_KEY=your-secret-key-here
+   DJANGO_SETTINGS_MODULE=flightcode.settings
    DEBUG=False
-   ALLOWED_HOSTS=your-railway-domain.up.railway.app
+   SECRET_KEY=your-secret-key-here
+   DATABASE_URL=postgresql://... (auto-provided by Render)
    ```
 
-4. **Database**
-   - Railway automatically provides PostgreSQL
+6. **Database**
+   - Render automatically provides PostgreSQL
    - No additional configuration needed
 
 ### Heroku Deployment

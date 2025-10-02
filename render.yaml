@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: greenflight-optimizer
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
+    startCommand: gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: flightcode.settings
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: greenflight-db
+          property: connectionString
+
+  - type: pserv
+    name: greenflight-db
+    runtime: postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: greenflight
+      - key: POSTGRES_USER
+        value: greenflight_user
+      - key: POSTGRES_PASSWORD
+        generateValue: true
