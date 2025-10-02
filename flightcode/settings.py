@@ -11,7 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hfz4^=g(!p9(1j^$^@x*k%v=_e=5k_6=r@2=p1g8o5jsd9z0g)')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# Temporarily enable DEBUG to see error details
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # Handle Render domains dynamically
 allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
