@@ -1,0 +1,11 @@
+origin,destination,distance_km,aircraft_type,fuel_burn_per_km
+ENTEBBE,Nairobi,500,A320,2.5
+Kampala,Lagos,1850,B737,2.8
+Nairobi,Cairo,1200,A320,2.5
+Addis Ababa,Dubai,2400,B787,2.1
+Cape Town,Johannesburg,1270,A319,2.6
+Accra,London,5100,A350,1.9
+Khartoum,Istanbul,1800,B737,2.8
+Casablanca,Paris,2000,A320,2.5
+Tunis,Rome,750,A319,2.6
+Dar es Salaam,Mumbai,3800,B777,2.3

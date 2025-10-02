@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenFlight Optimizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --accent-color: #8BC34A;
+            --light-bg: #F1F8E9;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .eco-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .eco-badge {
+            font-size: 0.8rem;
+            padding: 0.35em 0.65em;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .eco-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .form-card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .form-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .results-card {
+            display: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .btn-eco {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-eco:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .savings-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        #eco-score-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .animation-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .loading-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-bg);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-leaf me-2"></i> GreenFlight Optimizer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics/"><i class="fas fa-chart-line me-1"></i> Analytics</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-alt me-1"></i> Reports
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/generate-report/">Sustainability Report (PDF)</a>
+                            <a class="dropdown-item" href="/api/predictive-analysis/">Predictive Analysis</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <div class="d-flex align-items-center text-dark text-decoration-none">
+                <span class="fs-4"><i class="fas fa-plane-departure me-2"></i> GreenFlight Optimizer</span>
+            </div>
+        </header>
+
+        <div class="p-5 mb-4 bg-light rounded-3 eco-header animation-fade-in">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Optimize Your Flight's Environmental Impact</h1>
+                <p class="col-md-8 fs-4">Calculate and reduce your carbon footprint by finding more efficient aircraft and routes.</p>
+                <a href="#optimization-form" class="btn btn-lg btn-eco mt-3"><i class="fas fa-search me-2"></i> Find Efficient Flights</a>
+            </div>
+        </div>
+
+        <div class="row align-items-md-stretch animation-fade-in">
+            <div class="col-md-6">
+                <div id="optimization-form" class="h-100 p-5 bg-light border rounded-3 form-card">
+                    <h2><i class="fas fa-route me-2"></i> Find Optimal Flight Options</h2>
+                    <form id="optimization-form">
+                        <div class="mb-3">
+                            <label for="origin" class="form-label">Origin</label>
+                            <select class="form-select" id="origin" required>
+                                <option value="" selected>Select origin</option>
+                                {% for origin in origins %}
+                                <option value="{{ origin }}">{{ origin }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destination" class="form-label">Destination</label>
+                            <select class="form-select" id="destination" required>
+                                <option value="" selected>Select destination</option>
+                                {% for destination in destinations %}
+                                <option value="{{ destination }}">{{ destination }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aircraft" class="form-label">Aircraft Type</label>
+                            <select class="form-select" id="aircraft" required>
+                                <option value="" selected>Select aircraft</option>
+                                {% for aircraft in aircraft_types %}
+                                <option value="{{ aircraft }}">{{ aircraft }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-eco mt-3"><i class="fas fa-calculator me-2"></i> Optimize Flight</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="results-card" class="h-100 p-5 bg-light border rounded-3 results-card">
+                    <h2><i class="fas fa-check-circle me-2 text-success"></i> Optimization Results</h2>
+                    <div class="alert alert-success mb-4">
+                        <h4><i class="fas fa-plane me-2"></i> Recommended Option:</h4>
+                        <p id="aircraft-recommendation" class="mb-0">Loading...</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="stat-card">
+                                <div class="savings-icon"><i class="fas fa-cloud"></i></div>
+                                <h5><span id="co2-saved">0</span> kg</h5>
+                                <p class="text-muted mb-0">CO₂ Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="stat-card">
+                                <div class="savings-icon"><i class="fas fa-gas-pump"></i></div>
+                                <h5><span id="fuel-saved">0</span> kg</h5>
+                                <p class="text-muted mb-0">Fuel Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="stat-card">
+                                <div class="savings-icon"><i class="fas fa-percentage"></i></div>
+                                <h5><span id="percent-improvement">0</span>%</h5>
+                                <p class="text-muted mb-0">Improvement</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="save-results" class="btn btn-eco mt-4">
+                        <i class="fas fa-save me-2"></i> Save These Results
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5 animation-fade-in">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0"><i class="fas fa-chart-line me-2"></i> Environmental Impact Dashboard</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="emissionsChart" width="400" height="300"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Top Eco-friendly Routes</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Route</th>
+                                                <th>Aircraft</th>
+                                                <th>CO₂ (kg)</th>
+                                                <th>Rating</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>ENTEBBE → NAIROBI</td>
+                                                <td>Embraer E190</td>
+                                                <td>4,899</td>
+                                                <td>
+                                                    <span class="text-success">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="far fa-star"></i>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>LONDON → PARIS</td>
+                                                <td>Airbus A220-300</td>
+                                                <td>3,002</td>
+                                                <td>
+                                                    <span class="text-success">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-chart-bar me-2"></i> Advanced Analytics & Reporting</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Unlock powerful insights with our advanced analytics and sustainability reporting tools:</p>
+                        <div class="d-flex justify-content-center flex-wrap">
+                            <a href="/analytics/" class="btn btn-outline-success m-2">
+                                <i class="fas fa-chart-line me-2"></i> Advanced Analytics
+                            </a>
+                            <a href="/generate-report/" class="btn btn-outline-success m-2">
+                                <i class="fas fa-file-pdf me-2"></i> Generate Sustainability Report
+                            </a>
+                            <a href="#" class="btn btn-outline-success m-2" id="show-predictions">
+                                <i class="fas fa-brain me-2"></i> View AI Predictions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize chart
+            const ctx = document.getElementById('emissionsChart').getContext('2d');
+            const emissionsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'CO₂ Emissions Saved (kg)',
+                        data: [1250, 1900, 3000, 5000, 2000, 3500],
+                        backgroundColor: 'rgba(76, 175, 80, 0.5)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Form submission with loading overlay
+            document.getElementById('optimization-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading overlay
+                document.getElementById('loading-overlay').classList.add('active');
+                
+                // Get form values
+                const origin = document.getElementById('origin').value;
+                const destination = document.getElementById('destination').value;
+                const aircraft = document.getElementById('aircraft').value;
+                
+                // Show loading state
+                document.getElementById('results-card').style.display = 'block';
+                document.getElementById('aircraft-recommendation').textContent = 'Calculating optimal options...';
+                
+                // API request
+                fetch('/api/optimise-flight/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        origin: origin,
+                        destination: destination,
+                        aircraft_type: aircraft
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading overlay
+                    document.getElementById('loading-overlay').classList.remove('active');
+                    
+                    if (data.error) {
+                        // Show user-friendly error for route not found
+                        document.querySelector('.alert').classList.remove('alert-success');
+                        document.querySelector('.alert').classList.add('alert-warning');
+                        
+                        let message = data.error;
+                        if (data.available_aircraft && data.available_aircraft.length > 0) {
+                            message += `<br><br>Available aircraft for this route: <strong>${data.available_aircraft.join(', ')}</strong>`;
+                        } else if (data.available_origins && data.available_destinations) {
+                            message += `<br><br>Try one of these available routes:`;
+                            message += `<br>• Origins: ${data.available_origins.slice(0, 5).join(', ')}`;
+                            message += `<br>• Destinations: ${data.available_destinations.slice(0, 5).join(', ')}`;
+                        }
+                        
+                        document.getElementById('aircraft-recommendation').innerHTML = message;
+                        
+                        // Reset statistics
+                        document.getElementById('co2-saved').textContent = '0';
+                        document.getElementById('fuel-saved').textContent = '0';
+                        document.getElementById('percent-improvement').textContent = '0';
+                        return;
+                    }
+                    
+                    // Update results for successful optimization
+                    let recommendation = '';
+                    if (data.optimized_route) {
+                        recommendation = `Switch to ${data.optimized_route.aircraft_type} for this route`;
+                        document.querySelector('.alert').classList.remove('alert-danger');
+                        document.querySelector('.alert').classList.add('alert-success');
+                    } else {
+                        recommendation = data.message || `Keep using ${data.original_route.aircraft_type} with optimized operations`;
+                        document.querySelector('.alert').classList.remove('alert-danger');
+                        document.querySelector('.alert').classList.add('alert-success');
+                    }
+                    
+                    document.getElementById('aircraft-recommendation').textContent = recommendation;
+                    document.getElementById('co2-saved').textContent = data.optimization.co2_saved_kg;
+                    document.getElementById('fuel-saved').textContent = data.optimization.fuel_saved_kg;
+                    document.getElementById('percent-improvement').textContent = data.optimization.percent_improvement;
+                })
+                .catch(error => {
+                    // Hide loading overlay
+                    document.getElementById('loading-overlay').classList.remove('active');
+                    
+                    console.error('Error:', error);
+                    document.querySelector('.alert').classList.remove('alert-success');
+                    document.querySelector('.alert').classList.add('alert-danger');
+                    document.getElementById('aircraft-recommendation').textContent = 'Server error. Please try again later.';
+                    
+                    // Reset statistics
+                    document.getElementById('co2-saved').textContent = '0';
+                    document.getElementById('fuel-saved').textContent = '0';
+                    document.getElementById('percent-improvement').textContent = '0';
+                });
+            });
+
+            // Add event handler for AI Predictions button
+            document.getElementById('show-predictions').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Show loading overlay
+                document.getElementById('loading-overlay').classList.add('active');
+                
+                // Make API request to get predictions
+                fetch('/api/predictive-analysis/')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading overlay
+                        document.getElementById('loading-overlay').classList.remove('active');
+                        
+                        if (data.error) {
+                            // Check for specific dependency error
+                            if (data.status === 'dependencies_missing') {
+                                showDependenciesModal(data);
+                            } else {
+                                console.error('Error:', data.error);
+                                alert('Failed to load AI predictions: ' + data.error);
+                            }
+                            return;
+                        }
+                        
+                        // Create and show modal with predictions
+                        showPredictionsModal(data);
+                    })
+                    .catch(error => {
+                        // Hide loading overlay
+                        document.getElementById('loading-overlay').classList.remove('active');
+                        
+                        console.error('Error:', error);
+                        alert('Failed to load AI predictions. Please try again later.');
+                    });
+            });
+            
+            // Function to show a modal explaining missing dependencies
+            function showDependenciesModal(data) {
+                const modalHTML = `
+                    <div class="modal fade" id="dependenciesModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> Missing Dependencies</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${data.error}</p>
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i> How to Install</h6>
+                                        <p>Run the following command in your server's terminal:</p>
+                                        <pre class="bg-light p-3"><code>${data.installation_instructions}</code></pre>
+                                    </div>
+                                    <p>After installing the required packages, restart the server and try again.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHTML;
+                document.body.appendChild(modalContainer);
+                
+                // Initialize and show modal
+                const modal = new bootstrap.Modal(document.getElementById('dependenciesModal'));
+                modal.show();
+            }
+            
+            // Function to create and display predictions modal
+            function showPredictionsModal(data) {
+                // Create modal HTML
+                const modalHTML = `
+                    <div class="modal fade" id="predictionsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title"><i class="fas fa-brain me-2"></i> AI Emissions Predictions</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h5>Emissions Forecast</h5>
+                                            <canvas id="predictionsChart" height="250"></canvas>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card border-success mb-3">
+                                                <div class="card-header bg-success text-white">Insights</div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Forecast Summary</h5>
+                                                    <p>Monthly improvement: <strong>${data.insights.monthly_improvement} kg</strong></p>
+                                                    <p>Annual savings: <strong>${data.insights.projected_annual_savings} kg</strong></p>
+                                                    <p>Confidence: <strong>${data.insights.confidence_score}%</strong></p>
+                                                    <h6 class="mt-3">Recommended Aircraft:</h6>
+                                                    <ul class="mb-0">
+                                                        ${data.insights.best_aircraft_recommendations.map(aircraft => `<li>${aircraft}</li>`).join('')}
+                                                    <h5 class="card-title">Forecast Summary</h5>
+                                                    <p>Monthly improvement: <strong>${data.insights.monthly_improvement} kg</strong></p>
+                                                    <p>Annual savings: <strong>${data.insights.projected_annual_savings} kg</strong></p>
+                                                    <p>Confidence: <strong>${data.insights.confidence_score}%</strong></p>
+                                                    <h6 class="mt-3">Recommended Aircraft:</h6>
+                                                    <ul class="mb-0">
+                                                        ${data.insights.best_aircraft_recommendations.map(aircraft => `<li>${aircraft}</li>`).join('')}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <a href="/analytics/" class="btn btn-success">Full Analytics</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHTML;
+                document.body.appendChild(modalContainer);
+                
+                // Initialize and show modal
+                const modal = new bootstrap.Modal(document.getElementById('predictionsModal'));
+                modal.show();
+                
+                // Draw predictions chart
+                const ctx = document.getElementById('predictionsChart').getContext('2d');
+                
+                // Combine historical and prediction data
+                const labels = [
+                    ...data.historical_data.months.map(m => `Past ${m+1}`),
+                    ...data.predictions.months.map(m => `Future ${m-data.historical_data.months.length+1}`)
+                ];
+                
+                const chartData = [
+                    ...data.historical_data.co2_saved,
+                    ...data.predictions.co2_saved
+                ];
+                
+                // Create chart
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Historical Data',
+                            data: data.historical_data.co2_saved,
+                            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 2
+                        }, {
+                            label: 'AI Predictions',
+                            data: Array(data.historical_data.co2_saved.length).fill(null).concat(data.predictions.co2_saved),
+                            backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                            borderColor: 'rgba(33, 150, 243, 1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CO₂ Saved (kg)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Add event handler for Save Results button
+            document.getElementById('save-results').addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const co2Saved = parseFloat(document.getElementById('co2-saved').textContent) || 0;
+
+                if (co2Saved > 0) {
+                    updateEcoScore(co2Saved);
+                    alert('Results saved successfully! Your eco score has been updated.');
+                } else {
+                    alert('No results to save. Please optimize a flight first.');
+                }
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function updateEcoScore(co2Saved) {
+            fetch('/api/passenger-score/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    co2_saved_kg: co2Saved
+                })
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    console.log('User not logged in, skipping eco score update');
+                    alert('Please log in to save your eco score!');
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    console.log('Eco score updated:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating eco score:', error);
+            });
+        }
+
+        // Clean up modals when hidden
+        document.addEventListener('hidden.bs.modal', function(event) {
+            // Remove the modal from the DOM when it's hidden
+            if (event.target.id === 'predictionsModal' || event.target.id === 'dependenciesModal') {
+                event.target.remove();
+            }
+        });
+    </script>
+</body>
+</html>

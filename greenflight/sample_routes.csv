@@ -1,0 +1,17 @@
+origin,destination,distance_km,aircraft_type,fuel_burn_per_km
+Entebbe,Nairobi,420.5,A319,2.5
+Entebbe,Nairobi,420.5,Boeing 737,2.8
+Nairobi,Entebbe,420.5,A319,2.5
+Nairobi,Entebbe,420.5,Boeing 737,2.8
+Kampala,Nairobi,450.0,A319,2.5
+Kampala,Nairobi,450.0,Boeing 737,2.8
+Nairobi,Kampala,450.0,A319,2.5
+Nairobi,Kampala,450.0,Boeing 737,2.8
+Entebbe,Kigali,380.2,A319,2.5
+Kigali,Entebbe,380.2,A319,2.5
+Nairobi,Dar es Salaam,520.8,A319,2.5
+Dar es Salaam,Nairobi,520.8,A319,2.5
+Entebbe,Addis Ababa,920.4,Boeing 737,2.8
+Addis Ababa,Entebbe,920.4,Boeing 737,2.8
+Nairobi,Addis Ababa,850.6,A319,2.5
+Addis Ababa,Nairobi,850.6,A319,2.5

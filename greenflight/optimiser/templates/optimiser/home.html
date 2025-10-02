@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenFlight - Flight Optimizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e8b57;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2e8b57;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #228b22;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 GreenFlight Optimizer</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Optimize your flight routes for reduced emissions and fuel consumption
+        </p>
+        
+        <form id="optimizeForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="origin">Origin Airport:</label>
+                <input type="text" id="origin" name="origin" placeholder="e.g., Entebbe" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="destination">Destination Airport:</label>
+                <input type="text" id="destination" name="destination" placeholder="e.g., Nairobi" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="aircraft_type">Aircraft Type:</label>
+                <select id="aircraft_type" name="aircraft_type" required>
+                    <option value="">Select Aircraft</option>
+                    <option value="A319">Airbus A319</option>
+                    <option value="Boeing 737">Boeing 737</option>
+                </select>
+            </div>
+            
+            <button type="submit">Optimize Flight</button>
+        </form>
+        
+        <div id="results" class="results">
+            <h3>Optimization Results</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('optimizeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                origin: formData.get('origin'),
+                destination: formData.get('destination'),
+                aircraft_type: formData.get('aircraft_type')
+            };
+            
+            fetch('/optimize/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('results');
+                const contentDiv = document.getElementById('resultContent');
+                
+                if (data.success) {
+                    contentDiv.innerHTML = `
+                        <p><strong>Route:</strong> ${data.route.origin} → ${data.route.destination}</p>
+                        <p><strong>Aircraft:</strong> ${data.route.aircraft_type}</p>
+                        <p><strong>Distance:</strong> ${data.route.distance_km.toFixed(1)} km</p>
+                        <p><strong>CO2 Emissions:</strong> ${data.route.co2_kg.toFixed(2)} kg</p>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                }
+                
+                resultsDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
+                            <p><strong>Route:</strong> ${data.route.origin} → ${data.route.destination}</p>
+                            <p><strong>Aircraft:</strong> ${data.route.aircraft_type}</p>
+                            <p><strong>Distance:</strong> ${data.route.distance_km.toFixed(1)} km</p>
+                            <p><strong>Fuel Consumption:</strong> ${data.route.fuel_burn_per_km} L/km</p>
+                            <p><strong>CO2 Emissions:</strong> ${data.route.co2_kg.toFixed(2)} kg</p>
+                        </div>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `
+                        <div class="error">
+                            <h4>Optimization Failed</h4>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const resultsDiv = document.getElementById('results');
+                const contentDiv = document.getElementById('resultContent');
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <h4>Network Error</h4>
+                        <p>Failed to connect to the server. Please try again.</p>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

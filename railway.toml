@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "python manage.py migrate && gunicorn flightcode.wsgi --bind 0.0.0.0:$PORT"
+
+[environment]
+DJANGO_SETTINGS_MODULE = "flightcode.settings"
+DEBUG = "False"

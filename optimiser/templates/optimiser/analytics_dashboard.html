@@ -1,0 +1,336 @@
+{% load optimiser_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Analytics | GreenFlight Optimizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --accent-color: #8BC34A;
+            --light-bg: #F1F8E9;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .analytics-card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+        
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .analytics-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .impact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .impact-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .impact-label {
+            color: #6c757d;
+        }
+        
+        .efficiency-bar {
+            height: 24px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .efficiency-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+        
+        #map-container {
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i> GreenFlight Optimizer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analytics/"><i class="fas fa-chart-line me-1"></i> Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/docs/"><i class="fas fa-code me-1"></i> API</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="analytics-header text-center">
+            <h1><i class="fas fa-chart-line me-2"></i> Environmental Impact Analytics</h1>
+            <p class="lead">Advanced insights into your carbon footprint reduction</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="analytics-card card text-center h-100">
+                    <div class="card-body">
+                        <div class="impact-icon"><i class="fas fa-cloud"></i></div>
+                        <div class="impact-number">{{ total_co2_saved|floatformat:0 }}</div>
+                        <div class="impact-label">kg CO₂ Saved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="analytics-card card text-center h-100">
+                    <div class="card-body">
+                        <div class="impact-icon"><i class="fas fa-gas-pump"></i></div>
+                        <div class="impact-number">{{ total_fuel_saved|floatformat:0 }}</div>
+                        <div class="impact-label">kg Fuel Saved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="analytics-card card text-center h-100">
+                    <div class="card-body">
+                        <div class="impact-icon"><i class="fas fa-tree"></i></div>
+                        <div class="impact-number">{{ trees_planted|default:0 }}</div>
+                        <div class="impact-label">Equivalent Trees Planted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="analytics-card card text-center h-100">
+                    <div class="card-body">
+                        <div class="impact-icon"><i class="fas fa-car"></i></div>
+                        <div class="impact-number">{{ car_km_avoided|default:0 }}</div>
+                        <div class="impact-label">Car km Avoided</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="analytics-card card h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i> Monthly CO₂ Savings Trend</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="monthlySavingsChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="analytics-card card h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i> Top Efficient Aircraft</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="aircraftEfficiencyChart">
+                            {% for aircraft, efficiency in top_aircraft %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ aircraft }}</span>
+                                    <span class="text-success">{{ efficiency|floatformat:2 }} kg/km</span>
+                                </div>
+                                <div class="efficiency-bar">
+                                    <div class="efficiency-fill" style="width: {{ efficiency|multiply:25 }}%"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="analytics-card card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-globe-americas me-2"></i> Flight Emissions Map</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="map-container">
+                            <div id="emissions-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Interactive map showing the relative carbon efficiency of global flight routes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="analytics-card card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-route me-2"></i> Most Eco-Friendly Routes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Route</th>
+                                        <th>Aircraft</th>
+                                        <th>Efficiency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for route in efficient_routes %}
+                                    <tr>
+                                        <td>{{ route.origin }} → {{ route.destination }}</td>
+                                        <td>{{ route.aircraft_type }}</td>
+                                        <td>{{ route.fuel_consumption_kg|divide:route.distance_km|floatformat:2 }} kg/km</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="analytics-card card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-industry me-2"></i> Carbon Impact Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="carbonImpactChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Monthly savings chart
+            const monthlyData = {{ monthly_data|safe }};
+            const months = monthlyData.map(d => new Date(d.month).toLocaleDateString('en-US', {month: 'short', year: 'numeric'}));
+            const co2Values = monthlyData.map(d => d.co2_saved || 0);
+            
+            new Chart(document.getElementById('monthlySavingsChart'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'CO₂ Saved (kg)',
+                        data: co2Values,
+                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'CO₂ (kg)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `CO₂ Saved: ${context.parsed.y.toLocaleString()} kg`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Carbon impact chart - comparing your savings to global standards
+            new Chart(document.getElementById('carbonImpactChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['CO₂ Reduction', 'Fuel Efficiency', 'Route Optimization', 'Aircraft Selection', 'Overall Impact'],
+                    datasets: [{
+                        label: 'Your Impact',
+                        data: [85, 78, 90, 95, 88],
+                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 2,
+                    }, {
+                        label: 'Industry Average',
+                        data: [65, 60, 70, 75, 67],
+                        backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                        borderColor: 'rgba(33, 150, 243, 1)',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+
+            // World map visualization
+            // This is just a placeholder - in a production environment,
+            // you would use a proper mapping library like Leaflet or Google Maps API
+            const mapContainer = document.getElementById('emissions-map');
+            mapContainer.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #eee;"><p>Interactive World Map<br>Showing Flight Routes and Emissions<br>(Requires API key for full implementation)</p></div>';
+        });
+    </script>
+</body>
+</html>

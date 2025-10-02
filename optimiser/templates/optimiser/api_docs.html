@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation | GreenFlight Optimizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            background-color: #343a40;
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            padding-top: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 0.5rem 1rem;
+            border-radius: 0;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--primary-color);
+        }
+        
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .endpoint {
+            margin-bottom: 40px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .endpoint-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .endpoint-body {
+            padding: 20px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get {
+            background-color: #61affe;
+            color: white;
+        }
+        
+        .post {
+            background-color: #49cc90;
+            color: white;
+        }
+        
+        .put {
+            background-color: #fca130;
+            color: white;
+        }
+        
+        .delete {
+            background-color: #f93e3e;
+            color: white;
+        }
+        
+        .params-table {
+            margin-bottom: 20px;
+        }
+        
+        .response-example {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky">
+                    <div class="px-3 py-2">
+                        <h5>API Documentation</h5>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#introduction">Introduction</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#authentication">Authentication</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#routes">Routes API</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#optimise">Flight Optimization API</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#passenger">Passenger Score API</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1>GreenFlight Optimizer API Documentation</h1>
+                </div>
+
+                <!-- Introduction -->
+                <section id="introduction" class="mb-5">
+                    <h2>Introduction</h2>
+                    <p>
+                        The GreenFlight Optimizer API allows developers to access and integrate the flight optimization
+                        functionality into their own applications. This documentation provides information about the available
+                        endpoints, request parameters, and response formats.
+                    </p>
+                    <p>
+                        <strong>Base URL:</strong> <code>https://example.com/api/</code>
+                    </p>
+                </section>
+
+                <!-- Authentication -->
+                <section id="authentication" class="mb-5">
+                    <h2>Authentication</h2>
+                    <p>
+                        Some API endpoints require authentication. To authenticate your requests, include a valid CSRF token
+                        in the header of your request.
+                    </p>
+                    <pre><code class="language-javascript">
+// Example of including CSRF token in a fetch request
+fetch('/api/passenger-score/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+        co2_saved_kg: 100
+    })
+})
+                    </code></pre>
+                </section>
+
+                <!-- Routes API -->
+                <section id="routes" class="mb-5">
+                    <h2>Routes API</h2>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="endpoint-url">/api/routes/</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p>
+                                Returns a list of available flight routes. You can filter the results by origin and destination.
+                            </p>
+                            <h5>Query Parameters</h5>
+                            <table class="table table-striped params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Required</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>origin</td>
+                                        <td>No</td>
+                                        <td>String</td>
+                                        <td>Filter routes by origin airport</td>
+                                    </tr>
+                                    <tr>
+                                        <td>destination</td>
+                                        <td>No</td>
+                                        <td>String</td>
+                                        <td>Filter routes by destination airport</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5>Response Example</h5>
+                            <pre><code class="language-json">
+[
+    {
+        "id": 1,
+        "origin": "ENTEBBE",
+        "destination": "NAIROBI",
+        "aircraft_type": "Boeing 737-800",
+        "distance_km": 500,
+        "fuel_consumption_kg": 1800
+    },
+    {
+        "id": 2,
+        "origin": "ENTEBBE",
+        "destination": "NAIROBI",
+        "aircraft_type": "Airbus A320",
+        "distance_km": 500,
+        "fuel_consumption_kg": 1750
+    }
+]
+                            </code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Flight Optimization API -->
+                <section id="optimise" class="mb-5">
+                    <h2>Flight Optimization API</h2>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="endpoint-url">/api/optimise-flight/</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p>
+                                Optimizes a flight route to find more efficient options. This endpoint compares different
+                                aircraft for the same route and calculates potential fuel and CO2 savings.
+                            </p>
+                            <h5>Request Body</h5>
+                            <table class="table table-striped params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Required</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>origin</td>
+                                        <td>Yes</td>
+                                        <td>String</td>
+                                        <td>Origin airport</td>
+                                    </tr>
+                                    <tr>
+                                        <td>destination</td>
+                                        <td>Yes</td>
+                                        <td>String</td>
+                                        <td>Destination airport</td>
+                                    </tr>
+                                    <tr>
+                                        <td>aircraft_type</td>
+                                        <td>Yes</td>
+                                        <td>String</td>
+                                        <td>Aircraft type to optimize</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5>Response Example</h5>
+                            <pre><code class="language-json">
+{
+    "original_route": {
+        "id": 1,
+        "origin": "ENTEBBE",
+        "destination": "NAIROBI",
+        "aircraft_type": "Boeing 737-800",
+        "distance_km": 500,
+        "fuel_consumption_kg": 1800
+    },
+    "optimized_route": {
+        "id": 3,
+        "origin": "ENTEBBE",
+        "destination": "NAIROBI",
+        "aircraft_type": "Embraer E190",
+        "distance_km": 500,
+        "fuel_consumption_kg": 1550
+    },
+    "optimization": {
+        "fuel_saved_kg": 250,
+        "co2_saved_kg": 790,
+        "percent_improvement": 13.89
+    }
+}
+                            </code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Passenger Score API -->
+                <section id="passenger" class="mb-5">
+                    <h2>Passenger Score API</h2>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="endpoint-url">/api/passenger-score/</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p>
+                                Returns the eco-score and badges for the authenticated user.
+                            </p>
+                            <h5>Response Example</h5>
+                            <pre><code class="language-json">
+{
+    "id": 1,
+    "username": "jane_doe",
+    "points": 350,
+    "flights_optimized": 5,
+    "total_co2_saved": 2500,
+    "current_badge": "BRONZE"
+}
+                            </code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="endpoint-url">/api/passenger-score/</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p>
+                                Updates the eco-score for the authenticated user based on CO2 savings.
+                            </p>
+                            <h5>Request Body</h5>
+                            <table class="table table-striped params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Required</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>co2_saved_kg</td>
+                                        <td>Yes</td>
+                                        <td>Number</td>
+                                        <td>Amount of CO2 saved in kg</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5>Response Example</h5>
+                            <pre><code class="language-json">
+{
+    "id": 1,
+    "username": "jane_doe",
+    "points": 400,
+    "flights_optimized": 6,
+    "total_co2_saved": 3500,
+    "current_badge": "SILVER"
+}
+                            </code></pre>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
