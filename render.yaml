@@ -16,14 +16,3 @@ services:
           type: pserv
           name: greenflight-db
           property: connectionString
-
-  - type: pserv
-    name: greenflight-db
-    runtime: postgres
-    envVars:
-      - key: POSTGRES_DB
-        value: greenflight
-      - key: POSTGRES_USER
-        value: greenflight_user
-      - key: POSTGRES_PASSWORD
-        generateValue: true

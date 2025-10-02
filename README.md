@@ -48,40 +48,39 @@ python manage.py runserver
    - Go to [render.com](https://render.com)
    - Sign up with GitHub
 
-2. **Deploy with Blueprint (Easiest)**
+2. **Push Code to GitHub**
    ```bash
-   # Push your code to GitHub first
    git add .
    git commit -m "Ready for Render deployment"
    git push origin main
    ```
 
-3. **Create New Blueprint**
-   - Go to Render Dashboard
-   - Click "New" → "Blueprint"
-   - Connect your GitHub repository
-   - Render will auto-detect `render.yaml` and create services
+3. **Create PostgreSQL Database**
+   - Click "New" → "PostgreSQL"
+   - Name: `greenflight-db`
+   - Copy the `DATABASE_URL` (you'll need this later)
 
-4. **Or Manual Setup:**
+4. **Create Web Service**
    - Click "New" → "Web Service"
-   - Connect your GitHub repo
-   - Set:
-     - **Runtime:** Python 3
+   - Connect your GitHub repository
+   - Configure:
+     - **Name:** `greenflight-optimizer`
+     - **Runtime:** `Python 3`
      - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput --clear`
      - **Start Command:** `gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT`
 
 5. **Environment Variables**
-   Set these in Render dashboard:
+   In your web service → Environment:
    ```
    DJANGO_SETTINGS_MODULE=flightcode.settings
    DEBUG=False
    SECRET_KEY=your-secret-key-here
-   DATABASE_URL=postgresql://... (auto-provided by Render)
+   DATABASE_URL=postgresql://... (paste from database)
    ```
 
-6. **Database**
-   - Render automatically provides PostgreSQL
-   - No additional configuration needed
+6. **Deploy**
+   - Click "Create Web Service"
+   - Render will build and deploy automatically
 
 ### Heroku Deployment
 
