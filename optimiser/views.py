@@ -64,9 +64,14 @@ def home(request):
         aircraft_types = list(FlightRoute.objects.values_list('aircraft_type', flat=True).distinct())
     except Exception as e:
         # Provide default values if database error
-        origins = ["ENTEBBE", "NAIROBI", "LONDON", "NEW YORK", "JOHANNESBURG"]
-        destinations = ["NAIROBI", "DAR ES SALAAM", "PARIS", "WASHINGTON", "CAPE TOWN"]
-        aircraft_types = ["Boeing 737-800", "Airbus A320", "Embraer E190", "Airbus A220-300", "Boeing 787-8"]
+        origins = ["ENTEBBE", "NAIROBI", "LONDON", "NEW YORK", "JOHANNESBURG", "PARIS", "BERLIN", 
+                  "DUBAI", "SINGAPORE", "TOKYO", "SYDNEY", "CAIRO", "LAGOS", "CHICAGO", "LOS ANGELES"]
+        destinations = ["NAIROBI", "DAR ES SALAAM", "PARIS", "WASHINGTON", "CAPE TOWN", "DUBAI", 
+                        "AMSTERDAM", "ROME", "BANGKOK", "HONG KONG", "NEW DELHI", "MADRID", "SAN FRANCISCO", 
+                        "TORONTO", "MEXICO CITY"]
+        aircraft_types = ["Boeing 737-800", "Boeing 787-8", "Boeing 777-300ER", "Boeing 787-9", 
+                         "Airbus A320", "Airbus A350-900", "Airbus A330-300", "Airbus A220-300", 
+                         "Embraer E190", "ATR 72-600", "Airbus A380"]
         
         # Log the error
         import logging
@@ -75,11 +80,16 @@ def home(request):
 
     # Provide default values if database is empty
     if not origins:
-        origins = ["ENTEBBE", "NAIROBI", "LONDON", "NEW YORK", "JOHANNESBURG"]
+        origins = ["ENTEBBE", "NAIROBI", "LONDON", "NEW YORK", "JOHANNESBURG", "PARIS", "BERLIN", 
+                  "DUBAI", "SINGAPORE", "TOKYO", "SYDNEY", "CAIRO", "LAGOS", "CHICAGO", "LOS ANGELES"]
     if not destinations:
-        destinations = ["NAIROBI", "DAR ES SALAAM", "PARIS", "WASHINGTON", "CAPE TOWN"]
+        destinations = ["NAIROBI", "DAR ES SALAAM", "PARIS", "WASHINGTON", "CAPE TOWN", "DUBAI", 
+                        "AMSTERDAM", "ROME", "BANGKOK", "HONG KONG", "NEW DELHI", "MADRID", "SAN FRANCISCO", 
+                        "TORONTO", "MEXICO CITY"]
     if not aircraft_types:
-        aircraft_types = ["Boeing 737-800", "Airbus A320", "Embraer E190", "Airbus A220-300", "Boeing 787-8"]
+        aircraft_types = ["Boeing 737-800", "Boeing 787-8", "Boeing 777-300ER", "Boeing 787-9", 
+                         "Airbus A320", "Airbus A350-900", "Airbus A330-300", "Airbus A220-300", 
+                         "Embraer E190", "ATR 72-600", "Airbus A380"]
 
     context = {
         'origins': origins,

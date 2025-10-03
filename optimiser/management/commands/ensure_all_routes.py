@@ -36,11 +36,26 @@ class Command(BaseCommand):
         distance_map = {}
         fuel_consumption_factors = {
             'Boeing 737-800': 3.6,
-            'Airbus A320': 3.5,
+            'Boeing 737-700': 3.7,
+            'Boeing 737-900ER': 3.5,
             'Boeing 787-8': 3.2,
-            'ATR 72-600': 2.3,
-            'Embraer E190': 3.0,
+            'Boeing 787-9': 3.1,
+            'Boeing 777-300ER': 3.9,
+            'Boeing 747-8': 4.5,
+            'Boeing 767-300ER': 3.8,
+            'Boeing 757-200': 3.7,
+            'Airbus A320': 3.5,
+            'Airbus A319': 3.6,
+            'Airbus A321neo': 3.3,
+            'Airbus A330-300': 3.4,
+            'Airbus A350-900': 3.0,
+            'Airbus A380': 4.7,
             'Airbus A220-300': 2.8,
+            'Embraer E190': 3.0,
+            'Embraer E195-E2': 2.9,
+            'ATR 72-600': 2.3,
+            'Bombardier Q400': 2.5,
+            'Bombardier CRJ-900': 3.0,
         }
         
         # Build distance map from existing routes
@@ -55,12 +70,40 @@ class Command(BaseCommand):
             ('ENTEBBE', 'NAIROBI'): 500,
             ('NAIROBI', 'DAR ES SALAAM'): 430,
             ('JOHANNESBURG', 'CAPE TOWN'): 1270,
+            ('ADDIS ABABA', 'NAIROBI'): 1160,
+            ('CAIRO', 'ADDIS ABABA'): 2210,
+            ('LAGOS', 'ACCRA'): 430,
+            ('KHARTOUM', 'ADDIS ABABA'): 1000,
+            ('ABIDJAN', 'LAGOS'): 780,
             
             # Europe-Europe routes
             ('LONDON', 'PARIS'): 340,
+            ('BERLIN', 'PARIS'): 880,
+            ('MADRID', 'ROME'): 1360,
+            ('AMSTERDAM', 'LONDON'): 370,
+            ('STOCKHOLM', 'BERLIN'): 810,
+            ('VIENNA', 'PRAGUE'): 280,
+            ('ZURICH', 'FRANKFURT'): 300,
+            ('LISBON', 'MADRID'): 510,
             
             # North America routes
             ('NEW YORK', 'WASHINGTON'): 330,
+            ('CHICAGO', 'NEW YORK'): 1150,
+            ('LOS ANGELES', 'SAN FRANCISCO'): 550,
+            ('MIAMI', 'ATLANTA'): 980,
+            ('TORONTO', 'NEW YORK'): 550,
+            ('MEXICO CITY', 'HOUSTON'): 1200,
+            ('VANCOUVER', 'SEATTLE'): 200,
+            ('DENVER', 'CHICAGO'): 1460,
+            
+            # Asia routes
+            ('DUBAI', 'MUMBAI'): 1920,
+            ('SINGAPORE', 'BANGKOK'): 1420,
+            ('TOKYO', 'SEOUL'): 1160,
+            ('HONG KONG', 'SHANGHAI'): 1260,
+            ('DELHI', 'BANGKOK'): 2950,
+            ('BEIJING', 'TOKYO'): 2100,
+            ('KUALA LUMPUR', 'SINGAPORE'): 300,
             
             # Intercontinental routes
             ('LONDON', 'NEW YORK'): 5550,
@@ -71,7 +114,17 @@ class Command(BaseCommand):
             ('ENTEBBE', 'LONDON'): 6500,
             ('ENTEBBE', 'PARIS'): 5900,
             ('NAIROBI', 'NEW YORK'): 11700,
-            ('ENTEBBE', 'NEW YORK'): 11500
+            ('ENTEBBE', 'NEW YORK'): 11500,
+            ('DUBAI', 'LONDON'): 5500,
+            ('SINGAPORE', 'LONDON'): 10900,
+            ('SYDNEY', 'LOS ANGELES'): 12050,
+            ('JOHANNESBURG', 'LONDON'): 9000,
+            ('TOKYO', 'SAN FRANCISCO'): 8300,
+            ('CAIRO', 'NEW YORK'): 9000,
+            ('RIO DE JANEIRO', 'MADRID'): 8400,
+            ('MEXICO CITY', 'PARIS'): 9200,
+            ('TORONTO', 'DUBAI'): 11200,
+            ('BANGKOK', 'FRANKFURT'): 9000,
         }
         
         # Fill the distance map with typical distances

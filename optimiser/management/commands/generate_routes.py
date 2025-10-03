@@ -60,8 +60,15 @@ class Command(BaseCommand):
             # This is a simplistic model and could be improved
             base_consumption = {
                 'Boeing 737-800': 3.5,
-                'Airbus A320': 3.4,
+                'Boeing 737-700': 3.6,
+                'Boeing 737-900ER': 3.4,
                 'Boeing 787-8': 3.0,
+                'Boeing 787-9': 2.9,
+                'Boeing 777-300ER': 3.8,
+                'Airbus A320': 3.4,
+                'Airbus A320neo': 3.2,
+                'Airbus A350-900': 2.9,
+                'Airbus A330-300': 3.3,
                 'ATR 72-600': 2.2,
                 'Embraer E190': 3.0,
                 'Airbus A220-300': 2.8,
