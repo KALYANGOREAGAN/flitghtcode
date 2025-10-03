@@ -16,6 +16,7 @@ urlpatterns = [
     path('analytics/', views.analytics_dashboard, name='analytics'),
     path('generate-report/', views.generate_report, name='generate-report'),
     path('api/predictive-analysis/', views.predictive_analysis, name='predictive-analysis'),
+    path('health/', views.health_check, name='health_check'),
 ]
 
 

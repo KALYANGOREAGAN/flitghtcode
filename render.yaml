@@ -2,13 +2,15 @@ services:
   - type: web
     name: greenflight-optimizer
     runtime: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
-    startCommand: gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
+    startCommand: python manage.py initialize_database && gunicorn flightcode.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: flightcode.settings
       - key: DEBUG
-        value: "False"
+        value: "True"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,127.0.0.1,localhost,flitghtcode-1.onrender.com"
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
@@ -16,3 +18,4 @@ services:
           type: pserv
           name: greenflight-db
           property: connectionString
+    healthCheckPath: /health/

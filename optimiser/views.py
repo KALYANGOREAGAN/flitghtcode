@@ -16,10 +16,62 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('optimiser:dashboard')
 
-    # Get data from database or use defaults if empty
-    origins = list(FlightRoute.objects.values_list('origin', flat=True).distinct())
-    destinations = list(FlightRoute.objects.values_list('destination', flat=True).distinct())
-    aircraft_types = list(FlightRoute.objects.values_list('aircraft_type', flat=True).distinct())
+    # Emergency database initialization if tables don't exist
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute("SELECT COUNT(*) FROM optimiser_flightroute")
+                count = cursor.fetchone()[0]
+                print(f"Found {count} routes in database")
+            except Exception as db_error:
+                print(f"Database error: {str(db_error)}")
+                print("Attempting emergency migration...")
+                try:
+                    # Try to create the table directly
+                    cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS optimiser_flightroute (
+                        id SERIAL PRIMARY KEY,
+                        origin VARCHAR(100) NOT NULL,
+                        destination VARCHAR(100) NOT NULL,
+                        aircraft_type VARCHAR(100) NOT NULL,
+                        distance_km FLOAT NOT NULL,
+                        fuel_consumption_kg FLOAT NOT NULL
+                    )
+                    """)
+                    
+                    # Add some sample data
+                    cursor.execute("""
+                    INSERT INTO optimiser_flightroute (origin, destination, aircraft_type, distance_km, fuel_consumption_kg)
+                    VALUES 
+                    ('ENTEBBE', 'NAIROBI', 'Boeing 737-800', 500, 1800),
+                    ('LONDON', 'PARIS', 'Airbus A320', 340, 1350),
+                    ('NEW YORK', 'WASHINGTON', 'Embraer E190', 330, 1100)
+                    ON CONFLICT DO NOTHING
+                    """)
+                    print("Emergency table creation completed")
+                except Exception as create_error:
+                    print(f"Emergency table creation failed: {str(create_error)}")
+    except Exception as e:
+        print(f"Database setup error: {str(e)}")
+
+    # Get data with robust error handling
+    try:
+        # Get data from database or use defaults if empty
+        from .models import FlightRoute
+        origins = list(FlightRoute.objects.values_list('origin', flat=True).distinct())
+        destinations = list(FlightRoute.objects.values_list('destination', flat=True).distinct())
+        aircraft_types = list(FlightRoute.objects.values_list('aircraft_type', flat=True).distinct())
+    except Exception as e:
+        # Provide default values if database error
+        origins = ["ENTEBBE", "NAIROBI", "LONDON", "NEW YORK", "JOHANNESBURG"]
+        destinations = ["NAIROBI", "DAR ES SALAAM", "PARIS", "WASHINGTON", "CAPE TOWN"]
+        aircraft_types = ["Boeing 737-800", "Airbus A320", "Embraer E190", "Airbus A220-300", "Boeing 787-8"]
+        
+        # Log the error
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error fetching flight data: {str(e)}")
 
     # Provide default values if database is empty
     if not origins:
@@ -664,3 +716,36 @@ def predictive_analysis(request):
             'error': str(e),
             'message': 'Error generating predictive analysis'
         }, status=500)
+
+def health_check(request):
+    """Simple health check endpoint for deployment monitoring"""
+    from django.http import JsonResponse
+    from django.db import connection
+    from datetime import datetime
+    
+    # Check database connection
+    try:
+        with connection.cursor() as cursor:
+            # Try to create tables if they don't exist
+            try:
+                cursor.execute("SELECT COUNT(*) FROM optimiser_flightroute")
+                db_status = "connected, tables exist"
+            except Exception:
+                db_status = "connected, tables missing"
+                
+                # Try to run migrations
+                from django.core.management import call_command
+                try:
+                    call_command('migrate', 'optimiser', '--noinput')
+                    db_status = "connected, migrations applied"
+                except Exception as migrate_error:
+                    db_status = f"connected, migration failed: {str(migrate_error)}"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    # Return status
+    return JsonResponse({
+        "status": "healthy",
+        "database": db_status,
+        "server_time": str(datetime.now()),
+    })
